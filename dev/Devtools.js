@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════
-   devtools.js — ConecTEA
+   dev/Devtools.js — ConecTEA
    Modal de DevTools auto-injetável.
    Basta incluir este script em qualquer página
    (após state.js) e o botão 🛠️ aparece.

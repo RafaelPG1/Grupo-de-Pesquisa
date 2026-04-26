@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════
-   cuidador.js — ConecTEA
+   cuidador/cuidador.js — ConecTEA
    Lê todos os dados do state.js (localStorage).
    Atualiza automaticamente quando a criança
    interage (mesmo em outra aba).
