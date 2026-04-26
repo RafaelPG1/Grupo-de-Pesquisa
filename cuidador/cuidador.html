@@ -201,29 +201,98 @@
       <div class="dh">
         <button class="bk" id="bk3">←</button>
         <span class="dh-t">Relatórios</span>
-        <span style="width:36px"></span>
+        <button class="rel-export-btn rh" id="btnRelTexto" title="Exportar">📤</button>
       </div>
       <div class="dh-curve"></div>
 
+      <!-- TABS DE PERÍODO -->
+      <div class="rel-tabs">
+        <button class="rel-tab active" data-periodo="hoje">Hoje</button>
+        <button class="rel-tab" data-periodo="semana">7 dias</button>
+        <button class="rel-tab" data-periodo="mes">30 dias</button>
+      </div>
+
       <div class="rel-b">
+
+        <!-- STATS: 4 cards -->
         <div class="stat-row">
-          <div class="sc"><p class="sc-v" id="statEventos">0</p><p class="sc-l">Eventos hoje</p></div>
-          <div class="sc red"><p class="sc-v" id="statSOS">0</p><p class="sc-l">SOS hoje</p></div>
-          <div class="sc grn"><p class="sc-v" id="statNota">—</p><p class="sc-l">Nota do dia</p></div>
+          <div class="sc">
+            <p class="sc-v" id="statEventos">0</p>
+            <p class="sc-l">Eventos</p>
+          </div>
+          <div class="sc red">
+            <p class="sc-v" id="statSOS">0</p>
+            <p class="sc-l">SOS</p>
+          </div>
+          <div class="sc mood">
+            <p class="sc-v" id="statHumor">—</p>
+            <p class="sc-l">Humor</p>
+          </div>
+          <div class="sc grn">
+            <p class="sc-v" id="statNota">—</p>
+            <p class="sc-l">Nota do dia</p>
+          </div>
         </div>
 
-        <p class="rel-st">📈 Humor desta semana</p>
-        <div class="hc" id="humorChart"></div>
-
-        <p class="rel-st">⏰ Horários críticos</p>
-        <div class="crit">
-          <div class="crit-i"><span class="crit-t">09:30</span><span class="crit-d">Chegada — ansiedade alta</span></div>
-          <div class="crit-i"><span class="crit-t">12:15</span><span class="crit-d">Recreio — barulho excessivo</span></div>
-          <div class="crit-i"><span class="crit-t">15:00</span><span class="crit-d">Troca de atividade — resistência</span></div>
+        <!-- GRÁFICO HUMOR -->
+        <div class="rel-section">
+          <div class="rel-section-hd">
+            <span class="rel-section-ico">📈</span>
+            <span class="rel-section-t">Humor da criança</span>
+            <div class="hc-legenda">
+              <span class="hc-leg-item hc-leg-bem">Bem</span>
+              <span class="hc-leg-item hc-leg-norm">Normal</span>
+              <span class="hc-leg-item hc-leg-mal">Mal</span>
+            </div>
+          </div>
+          <div class="hc" id="humorChart"></div>
         </div>
 
-        <p class="rel-st">🙋 Necessidades mais pedidas</p>
-        <div class="ndc" id="needsChart"></div>
+        <!-- HORÁRIOS CRÍTICOS DINÂMICOS -->
+        <div class="rel-section">
+          <div class="rel-section-hd">
+            <span class="rel-section-ico">⏰</span>
+            <span class="rel-section-t">Momentos críticos</span>
+            <span class="rel-section-sub">SOS e humor baixo</span>
+          </div>
+          <div class="crit" id="critList"></div>
+        </div>
+
+        <!-- FREQUÊNCIA DE USO -->
+        <div class="rel-section">
+          <div class="rel-section-hd">
+            <span class="rel-section-ico">📉</span>
+            <span class="rel-section-t">Frequência de uso</span>
+            <span class="rel-section-sub">interações por dia</span>
+          </div>
+          <div class="freq-wrap" id="freqChart"></div>
+        </div>
+
+        <!-- TIPOS DE INTERAÇÃO (pizza) -->
+        <div class="rel-section">
+          <div class="rel-section-hd">
+            <span class="rel-section-ico">🍕</span>
+            <span class="rel-section-t">Tipos de interação</span>
+          </div>
+          <div id="pizzaChart"></div>
+        </div>
+
+        <!-- NECESSIDADES -->
+        <div class="rel-section">
+          <div class="rel-section-hd">
+            <span class="rel-section-ico">🙋</span>
+            <span class="rel-section-t">Necessidades mais pedidas</span>
+          </div>
+          <div class="ndc" id="needsChart"></div>
+        </div>
+
+        <!-- RESUMO TEXTUAL -->
+        <div class="resumo-blk" id="resumoBlk">
+          <div class="resumo-hd-lbl">Resumo do período</div>
+          <p class="resumo-txt" id="resumoTxt"></p>
+        </div>
+
+        <div style="height:8px"></div>
       </div>
 
     </section>
@@ -231,8 +300,24 @@
   </div>
 </div>
 
+<!-- ══ MODAL — RELATÓRIO TEXTUAL ══ -->
+<div class="rel-texto-overlay" id="relTextoModal">
+  <div class="rel-texto-modal">
+    <div class="rel-texto-hd">
+      <span class="rel-texto-title">📋 Relatório</span>
+      <div style="display:flex;gap:8px">
+        <button class="rel-texto-copy rh" id="btnCopiarRel">Copiar</button>
+        <button class="rel-texto-close" id="btnFecharModal">✕</button>
+      </div>
+    </div>
+    <pre class="rel-texto-area" id="relTextoArea"></pre>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
+<!-- Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <!-- state.js ANTES do cuidador.js -->
 <script src="../state.js"></script>
 <script src="./cuidador.js"></script>

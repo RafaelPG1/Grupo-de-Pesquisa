@@ -1,8 +1,8 @@
 /* ══════════════════════════════════════════
-   cuidador/cuidador.js — ConecTEA
-   Lê todos os dados do state.js (localStorage).
-   Atualiza automaticamente quando a criança
-   interage (mesmo em outra aba).
+   cuidador/cuidador.js — ConecTEA v2
+   Relatório reescrito: bugs corrigidos,
+   horários críticos reais, gráficos vivos,
+   relatório semanal/mensal e exportação texto.
 ══════════════════════════════════════════ */
 
 'use strict';
@@ -29,17 +29,13 @@ function goTo(name) {
 
 /* ── MAPEAMENTO: tipo de evento → badge ── */
 function getBadgeInfo(event) {
-  if (event.type === 'sos') {
-    return { cls: 'sos', badge: 'b-sos', bt: 'SOS' };
-  }
+  if (event.type === 'sos')  return { cls: 'sos', badge: 'b-sos', bt: 'SOS' };
   if (event.type === 'humor') {
-    if (event.mood === 'bem')    return { cls: '',     badge: 'b-ok',   bt: 'Ótimo' };
-    if (event.mood === 'mal')    return { cls: 'ruim', badge: 'b-ruim', bt: 'Atenção' };
+    if (event.mood === 'bem')  return { cls: '',     badge: 'b-ok',   bt: 'Ótimo' };
+    if (event.mood === 'mal')  return { cls: 'ruim', badge: 'b-ruim', bt: 'Atenção' };
     return { cls: '', badge: 'b-ped', bt: 'Humor' };
   }
-  if (event.type === 'need') {
-    return { cls: '', badge: 'b-ped', bt: 'Pedido' };
-  }
+  if (event.type === 'need') return { cls: '', badge: 'b-ped', bt: 'Pedido' };
   return { cls: '', badge: 'b-ok', bt: 'Info' };
 }
 
@@ -53,9 +49,9 @@ function getStatusIcon(status) {
 let currentEventId = null;
 
 function renderFeed() {
-  const feedEl   = document.getElementById('feed');
-  const countEl  = document.getElementById('feedCount');
-  const events   = FalaComigo.getEvents(true); // só hoje
+  const feedEl  = document.getElementById('feed');
+  const countEl = document.getElementById('feedCount');
+  const events  = FalaComigo.getEvents(true);
 
   feedEl.innerHTML = '';
 
@@ -101,7 +97,7 @@ function renderFeed() {
     feedEl.appendChild(card);
   });
 
-  // Mostra alerta SOS se houver SOS pendente
+  // SOS pendente
   const sosPendente = events.find(e => e.type === 'sos' && e.status === 'pending');
   const sosAlert = document.getElementById('sosAlert');
   if (sosPendente) {
@@ -111,28 +107,23 @@ function renderFeed() {
     sosAlert.classList.add('hidden');
   }
 
-  // Atualiza sugestão automática
   atualizarSugestao(events);
 }
 
 /* ── SUGESTÃO AUTOMÁTICA ── */
 function atualizarSugestao(events) {
   const sugCard = document.getElementById('sugCard');
-  const sugTx   = document.getElementById('sugTx') || sugCard.querySelector('.sug-tx');
+  const sugTx   = document.getElementById('sugTx');
 
   const pending = events.filter(e => e.status === 'pending');
-  if (!pending.length) {
-    sugCard.classList.add('hidden');
-    return;
-  }
+  if (!pending.length) { sugCard.classList.add('hidden'); return; }
 
-  // Prioridade: SOS > mal > necessidades
-  const sos   = pending.find(e => e.type === 'sos');
-  const mal   = pending.find(e => e.type === 'humor' && e.mood === 'mal');
-  const need  = pending.find(e => e.type === 'need');
+  const sos  = pending.find(e => e.type === 'sos');
+  const mal  = pending.find(e => e.type === 'humor' && e.mood === 'mal');
+  const need = pending.find(e => e.type === 'need');
 
   let sugestao = null;
-  if (sos)  sugestao = { msg: sos.message,  sug: 'Atender imediatamente — SOS ativo.' };
+  if (sos)       sugestao = { msg: sos.message,  sug: 'Atender imediatamente — SOS ativo.' };
   else if (mal)  sugestao = { msg: mal.message,  sug: 'Verificar o bem-estar da criança.' };
   else if (need) sugestao = { msg: need.message, sug: getSugestaoNeed(need.need) };
 
@@ -160,7 +151,6 @@ function getSugestaoNeed(need) {
 function abrirDetalhe(e) {
   currentEventId = e.id;
 
-  // Busca o humor mais recente do dia (anterior ou igual ao horário do evento)
   const todayEvents = FalaComigo.getEvents(true);
   const lastHumor   = todayEvents.find(ev =>
     ev.type === 'humor' && ev.time <= e.time && ev.id !== e.id
@@ -170,22 +160,20 @@ function abrirDetalhe(e) {
   document.getElementById('dMsg').textContent  = e.message;
   document.getElementById('dTime').textContent = '🕒 ' + e.time;
 
-  // Emoção: se o evento é humor usa o próprio, senão busca o humor mais recente do dia
   const humorRef = e.type === 'humor' ? e : lastHumor;
-  document.getElementById('dEmo').textContent  = humorRef
+  document.getElementById('dEmo').textContent = humorRef
     ? humorRef.icon + ' ' + ({ bem: 'Bem', normal: 'Normal', mal: 'Mal' }[humorRef.mood] || '—')
     : '—';
 
-  document.getElementById('dPed').textContent  = e.type === 'need'
+  document.getElementById('dPed').textContent = e.type === 'need'
     ? e.icon + ' ' + e.message.replace(/^[^\s]+\s/, '')
     : '—';
-  document.getElementById('dSug').textContent  = e.type === 'need'
+  document.getElementById('dSug').textContent = e.type === 'need'
     ? getSugestaoNeed(e.need)
     : e.type === 'sos'
       ? 'Atender imediatamente.'
       : 'Monitorar a situação.';
 
-  // Nota existente
   const notaIn = document.getElementById('notaIn');
   notaIn.value = e.note || '';
   document.getElementById('notaBox').classList.remove('open');
@@ -193,7 +181,638 @@ function abrirDetalhe(e) {
   goTo('detail');
 }
 
-/* ── TOAST ── */
+/* ══════════════════════════════════════════
+   RELATÓRIO — FUNÇÕES PRINCIPAIS
+══════════════════════════════════════════ */
+
+/* Período ativo no relatório */
+let relPeriodo = 'hoje'; // 'hoje' | 'semana' | 'mes'
+
+/* ── HELPER: gera string de data local YYYY-MM-DD ── */
+function dateStr(d) {
+  return d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0');
+}
+
+/* ── HELPER: data "hoje" respeitando o offset do DevTools ── */
+function hojeStr() {
+  return dateStr(FalaComigo.getSimulatedDate());
+}
+
+/* ── HELPER: eventos no período ── */
+function getEventosPeriodo(periodo) {
+  const todos = FalaComigo.getEvents(false);
+  const hoje  = hojeStr();
+
+  if (periodo === 'hoje') {
+    return todos.filter(e => e.date === hoje);
+  }
+  if (periodo === 'semana') {
+    const ini = FalaComigo.getSimulatedDate();
+    ini.setDate(ini.getDate() - 6);
+    return todos.filter(e => e.date >= dateStr(ini) && e.date <= hoje);
+  }
+  if (periodo === 'mes') {
+    const ini = FalaComigo.getSimulatedDate();
+    ini.setDate(ini.getDate() - 29);
+    return todos.filter(e => e.date >= dateStr(ini) && e.date <= hoje);
+  }
+  return todos;
+}
+
+/* ── STATS CARDS ── */
+function updateRelStats(periodo) {
+  const events  = getEventosPeriodo(periodo);
+  const total   = events.length;
+  const sosCnt  = events.filter(e => e.type === 'sos').length;
+  const checkout = FalaComigo.getTodayCheckout();
+
+  document.getElementById('statEventos').textContent = total;
+  document.getElementById('statSOS').textContent     = sosCnt;
+  document.getElementById('statNota').textContent    = checkout ? checkout.rating + '.0' : '—';
+
+  // Médias de humor no período
+  const humorEvs = events.filter(e => e.type === 'humor');
+  const avgHumor = humorEvs.length
+    ? Math.round(humorEvs.reduce((s, e) => s + ({bem:85,normal:50,mal:20}[e.mood]??50), 0) / humorEvs.length)
+    : null;
+
+  const humorEl = document.getElementById('statHumor');
+  if (humorEl) {
+    if (avgHumor === null) { humorEl.textContent = '—'; }
+    else if (avgHumor >= 70) { humorEl.textContent = '😄'; }
+    else if (avgHumor >= 40) { humorEl.textContent = '😐'; }
+    else                     { humorEl.textContent = '😢'; }
+  }
+}
+
+/* ── INSTÂNCIAS DOS GRÁFICOS Chart.js ── */
+const _charts = {};
+
+function _destroyChart(key) {
+  if (_charts[key]) { _charts[key].destroy(); delete _charts[key]; }
+}
+
+/* ── GRÁFICO DE HUMOR — barras verticais (Chart.js) ── */
+function renderHumorChart(periodo) {
+  const container = document.getElementById('humorChart');
+
+  // Monta slots de datas
+  const dias = periodo === 'mes' ? 30 : periodo === 'semana' ? 7 : 7;
+  const slots = [];
+  const history = JSON.parse(localStorage.getItem('fc_humor_history') || '[]');
+
+  for (let i = dias - 1; i >= 0; i--) {
+    const d = FalaComigo.getSimulatedDate();
+    d.setDate(d.getDate() - i);
+    const ds = dateStr(d);
+    const label = periodo === 'mes'
+      ? String(d.getDate()).padStart(2, '0')
+      : ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][d.getDay()];
+    const dayEntries = history.filter(h => h.date === ds);
+    const avg = dayEntries.length
+      ? Math.round(dayEntries.reduce((s, h) => s + h.score, 0) / dayEntries.length)
+      : null;
+    slots.push({ label: periodo === 'mes' ? (parseInt(label) % 5 === 0 ? label : '') : label, avg });
+  }
+
+  const labels = slots.map(s => s.label);
+  const data   = slots.map(s => s.avg !== null ? s.avg : 0);
+  const colors = slots.map(s =>
+    s.avg === null ? '#e0e0e0' : s.avg >= 70 ? '#22a862' : s.avg >= 40 ? '#f5c842' : '#e8455a'
+  );
+
+  // Cria canvas se não existir
+  container.innerHTML = '<canvas id="chartHumor" role="img" aria-label="Gráfico de barras do humor da criança">Humor da criança por dia.</canvas>';
+  _destroyChart('humor');
+
+  _charts['humor'] = new Chart(document.getElementById('chartHumor'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: colors,
+        borderRadius: 4,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: {
+        callbacks: {
+          label: ctx => {
+            const v = ctx.raw;
+            if (v === 0) return 'Sem dados';
+            return v >= 70 ? 'Bem 😄' : v >= 40 ? 'Normal 😐' : 'Mal 😢';
+          }
+        }
+      }},
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#aaa' }, border: { display: false } },
+        y: { display: false, min: 0, max: 100 },
+      }
+    }
+  });
+}
+
+/* ── GRÁFICO DE FREQUÊNCIA — linha (Chart.js) ── */
+function renderFreqChart(periodo) {
+  const container = document.getElementById('freqChart');
+  if (!container) return;
+
+  const dias = periodo === 'mes' ? 30 : 7;
+  const todos = FalaComigo.getEvents(false);
+  const slots = [];
+
+  for (let i = dias - 1; i >= 0; i--) {
+    const d  = FalaComigo.getSimulatedDate();
+    d.setDate(d.getDate() - i);
+    const ds = dateStr(d);
+    const label = periodo === 'mes'
+      ? String(d.getDate()).padStart(2, '0')
+      : ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][d.getDay()];
+    const count = todos.filter(e => e.date === ds).length;
+    slots.push({ label: periodo === 'mes' ? (parseInt(label) % 5 === 0 ? label : '') : label, count });
+  }
+
+  container.innerHTML = '<canvas id="chartFreq" role="img" aria-label="Frequência de uso por dia">Número de interações por dia.</canvas>';
+  _destroyChart('freq');
+
+  _charts['freq'] = new Chart(document.getElementById('chartFreq'), {
+    type: 'line',
+    data: {
+      labels: slots.map(s => s.label),
+      datasets: [{
+        data: slots.map(s => s.count),
+        borderColor: '#378add',
+        backgroundColor: 'rgba(55,138,221,.08)',
+        tension: 0.4,
+        fill: true,
+        pointBackgroundColor: '#378add',
+        pointRadius: 3,
+        pointBorderWidth: 0,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.raw + ' interações' } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#aaa' }, border: { display: false } },
+        y: { display: false, min: 0 },
+      }
+    }
+  });
+}
+
+/* ── GRÁFICO PIZZA — tipos de interação (Chart.js) ── */
+function renderPizzaChart(periodo) {
+  const container = document.getElementById('pizzaChart');
+  if (!container) return;
+
+  const events = getEventosPeriodo(periodo);
+  const humor  = events.filter(e => e.type === 'humor').length;
+  const need   = events.filter(e => e.type === 'need').length;
+  const sos    = events.filter(e => e.type === 'sos').length;
+  const total  = humor + need + sos || 1;
+
+  const dados = [
+    { l: 'Humor',      v: humor, c: '#22a862' },
+    { l: 'Necessidade',v: need,  c: '#378add' },
+    { l: 'SOS',        v: sos,   c: '#e8455a' },
+  ].filter(d => d.v > 0);
+
+  container.innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 14px 12px">
+      <div style="position:relative;width:76px;height:76px;flex-shrink:0">
+        <canvas id="chartPizza" role="img" aria-label="Gráfico pizza dos tipos de interação">Distribuição de interações.</canvas>
+      </div>
+      <div id="pizzaLeg" style="display:flex;flex-direction:column;gap:5px;font-size:11px;color:#555"></div>
+    </div>`;
+  _destroyChart('pizza');
+
+  _charts['pizza'] = new Chart(document.getElementById('chartPizza'), {
+    type: 'doughnut',
+    data: {
+      labels: dados.map(d => d.l),
+      datasets: [{
+        data: dados.map(d => d.v),
+        backgroundColor: dados.map(d => d.c),
+        borderWidth: 2,
+        borderColor: '#fff',
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '60%',
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => {
+        const pct = Math.round((ctx.raw / total) * 100);
+        return `${ctx.label}: ${ctx.raw} (${pct}%)`;
+      }}}}
+    }
+  });
+
+  // Legenda manual
+  const leg = document.getElementById('pizzaLeg');
+  if (leg) {
+    leg.innerHTML = dados.map(d => {
+      const pct = Math.round((d.v / total) * 100);
+      return `<span style="display:flex;align-items:center;gap:5px">
+        <span style="width:8px;height:8px;border-radius:2px;background:${d.c};flex-shrink:0"></span>
+        <span>${d.l} <strong style="color:#1a1a1a">${pct}%</strong></span>
+      </span>`;
+    }).join('');
+  }
+}
+
+/* ── GRÁFICO DE FREQUÊNCIA — linha (Chart.js) ── */
+function renderFreqChart(periodo) {
+  const container = document.getElementById('freqChart');
+  if (!container) return;
+
+  const dias = periodo === 'mes' ? 30 : 7;
+  const todos = FalaComigo.getEvents(false);
+  const slots = [];
+
+  for (let i = dias - 1; i >= 0; i--) {
+    const d  = FalaComigo.getSimulatedDate();
+    d.setDate(d.getDate() - i);
+    const ds = dateStr(d);
+    const label = periodo === 'mes'
+      ? String(d.getDate()).padStart(2, '0')
+      : ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][d.getDay()];
+    const count = todos.filter(e => e.date === ds).length;
+    slots.push({ label: periodo === 'mes' ? (parseInt(label) % 5 === 0 ? label : '') : label, count });
+  }
+
+  container.innerHTML = '<canvas id="chartFreq" role="img" aria-label="Frequência de uso por dia">Número de interações por dia.</canvas>';
+  _destroyChart('freq');
+
+  _charts['freq'] = new Chart(document.getElementById('chartFreq'), {
+    type: 'line',
+    data: {
+      labels: slots.map(s => s.label),
+      datasets: [{
+        data: slots.map(s => s.count),
+        borderColor: '#378add',
+        backgroundColor: 'rgba(55,138,221,.08)',
+        tension: 0.4,
+        fill: true,
+        pointBackgroundColor: '#378add',
+        pointRadius: 3,
+        pointBorderWidth: 0,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.raw + ' interações' } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#aaa' }, border: { display: false } },
+        y: { display: false, min: 0 },
+      }
+    }
+  });
+}
+
+/* ── GRÁFICO PIZZA — tipos de interação (Chart.js) ── */
+function renderPizzaChart(periodo) {
+  const container = document.getElementById('pizzaChart');
+  if (!container) return;
+
+  const events = getEventosPeriodo(periodo);
+  const humor  = events.filter(e => e.type === 'humor').length;
+  const need   = events.filter(e => e.type === 'need').length;
+  const sos    = events.filter(e => e.type === 'sos').length;
+  const total  = humor + need + sos || 1;
+
+  const dados = [
+    { l: 'Humor',       v: humor, c: '#22a862' },
+    { l: 'Necessidade', v: need,  c: '#378add' },
+    { l: 'SOS',         v: sos,   c: '#e8455a' },
+  ].filter(d => d.v > 0);
+
+  container.innerHTML = `
+    <div class="pizza-inner">
+      <div class="pizza-canvas-wrap">
+        <canvas id="chartPizza" role="img" aria-label="Gráfico pizza dos tipos de interação">Distribuição de interações.</canvas>
+      </div>
+      <div class="pizza-leg" id="pizzaLeg"></div>
+    </div>`;
+  _destroyChart('pizza');
+
+  if (!dados.length) {
+    container.innerHTML = '<div class="nc-empty">Nenhum dado disponível</div>';
+    return;
+  }
+
+  _charts['pizza'] = new Chart(document.getElementById('chartPizza'), {
+    type: 'doughnut',
+    data: {
+      labels: dados.map(d => d.l),
+      datasets: [{
+        data: dados.map(d => d.v),
+        backgroundColor: dados.map(d => d.c),
+        borderWidth: 2,
+        borderColor: '#fff',
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '60%',
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => {
+        const pct = Math.round((ctx.raw / total) * 100);
+        return `${ctx.label}: ${ctx.raw} (${pct}%)`;
+      }}}}
+    }
+  });
+
+  const leg = document.getElementById('pizzaLeg');
+  if (leg) {
+    leg.innerHTML = dados.map(d => {
+      const pct = Math.round((d.v / total) * 100);
+      return `<div class="pizza-leg-item">
+        <span class="pizza-leg-dot" style="background:${d.c}"></span>
+        <span>${d.l} <strong style="color:#1a1a1a">${pct}%</strong></span>
+      </div>`;
+    }).join('');
+  }
+}
+
+/* ── RESUMO TEXTUAL AUTOMÁTICO ── */
+function renderResumoTexto(periodo) {
+  const el = document.getElementById('resumoTxt');
+  if (!el) return;
+
+  const events  = getEventosPeriodo(periodo);
+  const profile = FalaComigo.getProfile();
+  const nome    = profile.name || 'A criança';
+  const total   = events.length;
+  const sosCnt  = events.filter(e => e.type === 'sos').length;
+
+  const humorEvs = events.filter(e => e.type === 'humor');
+  const bom  = humorEvs.filter(e => e.mood === 'bem').length;
+  const mal  = humorEvs.filter(e => e.mood === 'mal').length;
+  const norm = humorEvs.filter(e => e.mood === 'normal').length;
+  const humPred = bom >= norm && bom >= mal ? 'bom' : norm >= mal ? 'normal' : 'baixo';
+  const humEmoji = humPred === 'bom' ? '😄' : humPred === 'normal' ? '😐' : '😢';
+
+  const needCounts = {};
+  events.filter(e => e.type === 'need').forEach(e => {
+    needCounts[e.need] = (needCounts[e.need] || 0) + 1;
+  });
+  const topNeed = Object.entries(needCounts).sort((a, b) => b[1] - a[1])[0];
+
+  const checkout = FalaComigo.getTodayCheckout();
+  const labels = { hoje: 'hoje', semana: 'nos últimos 7 dias', mes: 'nos últimos 30 dias' };
+
+  const criticos = events.filter(e => e.type === 'sos' || (e.type === 'humor' && e.mood === 'mal'));
+  let horarioCritico = '';
+  if (criticos.length) {
+    const horas = criticos.map(e => e.time ? parseInt(e.time.slice(0,2)) : null).filter(Boolean);
+    if (horas.length) {
+      const counts = {};
+      horas.forEach(h => counts[h] = (counts[h] || 0) + 1);
+      const peakH = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0];
+      horarioCritico = ` O horário mais crítico foi às <strong>${peakH}h</strong>.`;
+    }
+  }
+
+  let resumo = `<strong>${nome}</strong> registrou <strong>${total}</strong> interação${total !== 1 ? 'ões' : ''} ${labels[periodo]}.`;
+  if (sosCnt > 0) resumo += ` Houve <strong>${sosCnt}</strong> alerta${sosCnt > 1 ? 's' : ''} SOS.`;
+  resumo += ` O humor predominante foi <strong>${humPred} ${humEmoji}</strong>.`;
+  if (horarioCritico) resumo += horarioCritico;
+  if (topNeed) resumo += ` A necessidade mais pedida foi <strong>${needLabel(topNeed[0])}</strong> (${topNeed[1]}x).`;
+  if (checkout) resumo += ` Nota do dia: <strong>${checkout.rating}/10</strong>.`;
+
+  el.innerHTML = resumo;
+}
+
+
+function renderHorariosCriticos(periodo) {
+  const container = document.getElementById('critList');
+  container.innerHTML = '';
+
+  const events = getEventosPeriodo(periodo);
+
+  // Eventos críticos = SOS + humor "mal"
+  const criticos = events.filter(e => e.type === 'sos' || (e.type === 'humor' && e.mood === 'mal'));
+
+  if (!criticos.length) {
+    container.innerHTML = `
+      <div class="crit-empty">
+        <span>✅</span>
+        <span>Nenhum horário crítico no período</span>
+      </div>`;
+    return;
+  }
+
+  // Agrupa por hora (HH) para ver concentração
+  const porHora = {};
+  criticos.forEach(e => {
+    const hora = e.time ? e.time.slice(0, 2) + ':00' : '--:--';
+    if (!porHora[hora]) porHora[hora] = [];
+    porHora[hora].push(e);
+  });
+
+  // Ordena por hora e pega top 5
+  const ordenados = Object.entries(porHora)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .slice(0, 5);
+
+  ordenados.forEach(([hora, evs]) => {
+    const isSOS = evs.some(e => e.type === 'sos');
+    const tipos = [...new Set(evs.map(e =>
+      e.type === 'sos' ? 'SOS urgente' : 'Humor baixo'
+    ))].join(', ');
+
+    const item = document.createElement('div');
+    item.className = `crit-i ${isSOS ? 'crit-sos' : 'crit-warn'}`;
+    item.innerHTML = `
+      <span class="crit-t">${hora}</span>
+      <div class="crit-info">
+        <span class="crit-d">${tipos}</span>
+        <span class="crit-cnt">${evs.length}x ocorrência${evs.length > 1 ? 's' : ''}</span>
+      </div>
+      <span class="crit-ico">${isSOS ? '🚨' : '⚠️'}</span>
+    `;
+    container.appendChild(item);
+  });
+}
+
+/* ── NECESSIDADES MAIS PEDIDAS ── */
+function renderNeedsChart(periodo) {
+  const container = document.getElementById('needsChart');
+  container.innerHTML = '';
+
+  const events = getEventosPeriodo(periodo);
+  const needEvs = events.filter(e => e.type === 'need');
+
+  const counts = {};
+  needEvs.forEach(e => {
+    counts[e.need] = (counts[e.need] || 0) + 1;
+  });
+
+  let dados = Object.entries(counts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([need, count]) => ({
+      l: needLabel(need),
+      icon: needIcon(need),
+      p: count,
+    }));
+
+  if (!dados.length) {
+    container.innerHTML = `<div class="nc-empty">Nenhuma necessidade registrada no período</div>`;
+    return;
+  }
+
+  const max = Math.max(...dados.map(d => d.p));
+
+  dados.forEach((n, i) => {
+    const pct = Math.round((n.p / max) * 100);
+    const row = document.createElement('div');
+    row.className = 'nc-r';
+    row.style.animationDelay = `${i * 0.07}s`;
+    row.innerHTML = `
+      <span class="nc-ico">${n.icon}</span>
+      <span class="nc-l">${n.l}</span>
+      <div class="nc-tk"><div class="nc-fl" style="width:0"></div></div>
+      <span class="nc-p">${n.p}x</span>
+    `;
+    container.appendChild(row);
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        row.querySelector('.nc-fl').style.width = pct + '%';
+      }, 120 + i * 60);
+    });
+  });
+}
+
+/* ── RELATÓRIO TEXTUAL ── */
+function gerarRelatorioTexto(periodo) {
+  const events   = getEventosPeriodo(periodo);
+  const profile  = FalaComigo.getProfile();
+  const checkout = FalaComigo.getTodayCheckout();
+  const hoje     = FalaComigo.getSimulatedDate().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+
+  const labels = { hoje: 'hoje', semana: 'nos últimos 7 dias', mes: 'nos últimos 30 dias' };
+
+  const total   = events.length;
+  const sosCnt  = events.filter(e => e.type === 'sos').length;
+  const humorBom = events.filter(e => e.type === 'humor' && e.mood === 'bem').length;
+  const humorNorm = events.filter(e => e.type === 'humor' && e.mood === 'normal').length;
+  const humorMal  = events.filter(e => e.type === 'humor' && e.mood === 'mal').length;
+
+  const needCounts = {};
+  events.filter(e => e.type === 'need').forEach(e => {
+    needCounts[e.need] = (needCounts[e.need] || 0) + 1;
+  });
+  const topNeed = Object.entries(needCounts).sort((a,b)=>b[1]-a[1])[0];
+
+  const criticos = events.filter(e => e.type === 'sos' || (e.type === 'humor' && e.mood === 'mal'));
+
+  const linhas = [
+    `━━━━━━━━━━━━━━━━━━━━━━━━━`,
+    `📋 RELATÓRIO — ConecTEA`,
+    `Criança: ${profile.name} ${profile.avatar}`,
+    `Período: ${labels[periodo]} (${hoje})`,
+    `Gerado por: Ana Silva — Cuidadora`,
+    `━━━━━━━━━━━━━━━━━━━━━━━━━`,
+    ``,
+    `📊 RESUMO GERAL`,
+    `• Total de interações: ${total}`,
+    `• Alertas SOS: ${sosCnt}`,
+    `• Humor bem: ${humorBom}x | normal: ${humorNorm}x | mal: ${humorMal}x`,
+    topNeed ? `• Necessidade mais pedida: ${needLabel(topNeed[0])} (${topNeed[1]}x)` : '',
+    checkout ? `• Nota do dia: ${checkout.rating}/10` : '',
+    ``,
+    `⚠️ MOMENTOS CRÍTICOS`,
+    ...(criticos.length
+      ? criticos.slice(0, 5).map(e => `• ${e.time} — ${e.message}`)
+      : ['• Nenhum momento crítico registrado']),
+    ``,
+    `📝 TODOS OS EVENTOS`,
+    ...events.slice(0, 20).map(e => `• ${e.time} ${e.icon} ${e.message} [${e.status}]`),
+    events.length > 20 ? `  ... e mais ${events.length - 20} eventos` : '',
+    ``,
+    checkout?.comment ? `💬 OBSERVAÇÃO: ${checkout.comment}` : '',
+    `━━━━━━━━━━━━━━━━━━━━━━━━━`,
+  ].filter(l => l !== undefined);
+
+  return linhas.join('\n');
+}
+
+/* ── EXIBIR RELATÓRIO TEXTUAL ── */
+function mostrarRelatorioTexto(periodo) {
+  const texto = gerarRelatorioTexto(periodo);
+  const modal = document.getElementById('relTextoModal');
+  const area  = document.getElementById('relTextoArea');
+  if (!modal || !area) return;
+  area.textContent = texto;
+  modal.classList.add('open');
+}
+
+/* ── COPIAR RELATÓRIO ── */
+function copiarRelatorio(periodo) {
+  const texto = gerarRelatorioTexto(periodo);
+  navigator.clipboard?.writeText(texto)
+    .then(() => showToast('📋 Relatório copiado!'))
+    .catch(() => {
+      // fallback
+      const ta = document.createElement('textarea');
+      ta.value = texto; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('📋 Relatório copiado!');
+    });
+}
+
+/* ── LABELS ── */
+function needLabel(need) {
+  const map = {
+    agua: 'Água', banheiro: 'Banheiro', descanso: 'Descanso',
+    abraco: 'Abraço', silencio: 'Silêncio', 'ir-embora': 'Ir embora',
+  };
+  return map[need] || need;
+}
+
+function needIcon(need) {
+  const map = {
+    agua: '💧', banheiro: '🚻', descanso: '😴',
+    abraco: '🤗', silencio: '🔇', 'ir-embora': '🚪',
+  };
+  return map[need] || '📌';
+}
+
+/* ── RENDERIZAR RELATÓRIO COMPLETO ── */
+function renderRelatorio(periodo) {
+  periodo = periodo || relPeriodo;
+  relPeriodo = periodo;
+
+  // Atualiza botões de período
+  document.querySelectorAll('.rel-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.periodo === periodo);
+  });
+
+  updateRelStats(periodo);
+  renderHumorChart(periodo);
+  renderFreqChart(periodo);
+  renderPizzaChart(periodo);
+  renderHorariosCriticos(periodo);
+  renderNeedsChart(periodo);
+  renderResumoTexto(periodo);
+}
+
+/* ══════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════ */
 let toastTimer;
 
 function showToast(msg) {
@@ -240,159 +859,54 @@ function renderStars() {
   }
 }
 
-/* ── GRÁFICO DE HUMOR ── */
-function renderHumorChart() {
-  const container = document.getElementById('humorChart');
-  container.innerHTML = '';
-
-  const history = FalaComigo.getHumorHistory(7);
-
-  history.forEach(day => {
-    const wrap = document.createElement('div');
-    wrap.className = 'hcw';
-
-    const bar = document.createElement('div');
-    bar.className = 'hcb';
-    bar.style.height = '0';
-    // Cor diferente se não houve dados
-    if (day.avg === null) bar.style.background = '#d0ead8';
-
-    const label = document.createElement('div');
-    label.className = 'hcd';
-    label.textContent = day.label;
-
-    wrap.appendChild(bar);
-    wrap.appendChild(label);
-    container.appendChild(wrap);
-
-    setTimeout(() => {
-      bar.style.height = day.avg !== null
-        ? (day.avg * 0.58) + 'px'
-        : '4px';
-    }, 300);
-  });
-}
-
-/* ── GRÁFICO DE NECESSIDADES ── */
-function renderNeedsChart() {
-  const container = document.getElementById('needsChart');
-  container.innerHTML = '';
-
-  const stats = FalaComigo.getTodayStats();
-
-  // Se não houver dados, usa fallback visual
-  let dados = stats.topNeeds.map(n => ({
-    l: needLabel(n.need),
-    p: Math.min(100, Math.round((n.count / Math.max(...stats.topNeeds.map(x => x.count))) * 100)),
-  }));
-
-  if (!dados.length) {
-    dados = [{ l: 'Sem dados', p: 0 }];
-  }
-
-  dados.forEach(n => {
-    const row = document.createElement('div');
-    row.className = 'nc-r';
-    row.innerHTML = `
-      <span class="nc-l">${n.l}</span>
-      <div class="nc-tk"><div class="nc-fl" data-p="${n.p}"></div></div>
-      <span class="nc-p">${n.p}%</span>
-    `;
-    container.appendChild(row);
-    setTimeout(() => {
-      row.querySelector('.nc-fl').style.width = n.p + '%';
-    }, 400);
-  });
-}
-
-function needLabel(need) {
-  const map = {
-    agua: 'Água', banheiro: 'Banheiro', descanso: 'Descanso',
-    abraco: 'Abraço', silencio: 'Silêncio', 'ir-embora': 'Ir embora',
-  };
-  return map[need] || need;
-}
-
-/* ── ATUALIZAR STATS DO RELATÓRIO ── */
-function updateStats() {
-  const stats = FalaComigo.getTodayStats();
-  const eventos  = document.getElementById('statEventos');
-  const sosStat  = document.getElementById('statSOS');
-  const notaStat = document.getElementById('statNota');
-
-  if (eventos)  eventos.textContent  = stats.total;
-  if (sosStat)  sosStat.textContent  = stats.sos;
-  if (notaStat) {
-    const checkout = FalaComigo.getTodayCheckout();
-    notaStat.textContent = checkout ? checkout.rating + '.0' : '—';
-  }
-}
-
-/* ── RENDERIZAR RELATÓRIO COMPLETO ── */
-function renderRelatorio() {
-  renderHumorChart();
-  renderNeedsChart();
-  updateStats();
-}
-
-/* ── LISTENERS DE EVENTOS ── */
+/* ══════════════════════════════════════════
+   LISTENERS
+══════════════════════════════════════════ */
 function setupEventListeners() {
 
-  // Topbar
   document.getElementById('btnRel').addEventListener('click', () => {
-    renderRelatorio();
+    renderRelatorio(relPeriodo);
     goTo('rel');
   });
+
   document.getElementById('btnCo').addEventListener('click', () => goTo('checkout'));
 
-  // Voltar
   ['bk1','bk2','bk3'].forEach(id => {
     document.getElementById(id).addEventListener('click', () => goTo('feed'));
   });
 
-  // Fechar SOS
   document.getElementById('sosDismiss').addEventListener('click', () => {
     document.getElementById('sosAlert').classList.add('hidden');
   });
 
-  // Fechar sugestão
   document.getElementById('sugDismiss').addEventListener('click', () => {
     document.getElementById('sugCard').classList.add('hidden');
   });
 
-  // Ações rápidas
+  // Ações rápidas no detalhe
   document.querySelectorAll('[data-a]').forEach(btn => {
     btn.addEventListener('click', () => {
-      const action = btn.dataset.a;
-      const status = action === 'resolvido' ? 'resolved' : 'watching';
-      if (currentEventId) {
-        FalaComigo.updateEvent(currentEventId, status);
-      }
-      const msg = status === 'resolved' ? '✔ Marcado como resolvido' : '⏳ Em acompanhamento';
-      showToast(msg);
+      const status = btn.dataset.a === 'resolvido' ? 'resolved' : 'watching';
+      if (currentEventId) FalaComigo.updateEvent(currentEventId, status);
+      showToast(status === 'resolved' ? '✔ Marcado como resolvido' : '⏳ Em acompanhamento');
       setTimeout(() => { renderFeed(); goTo('feed'); }, 700);
     });
   });
 
-  // Toggle nota
   document.getElementById('btnNota').addEventListener('click', () => {
     document.getElementById('notaBox').classList.toggle('open');
   });
 
-  // Salvar nota
   document.getElementById('notaSv').addEventListener('click', () => {
     const val = document.getElementById('notaIn').value.trim();
     if (!val) { showToast('Escreva algo antes de salvar'); return; }
-    if (currentEventId) {
-      FalaComigo.updateEvent(currentEventId, 'resolved', val);
-    }
+    if (currentEventId) FalaComigo.updateEvent(currentEventId, 'resolved', val);
     showToast('📝 Nota salva!');
     document.getElementById('notaBox').classList.remove('open');
     document.getElementById('notaIn').value = '';
     setTimeout(() => { renderFeed(); goTo('feed'); }, 700);
   });
 
-  // Salvar checkout
   document.getElementById('coSv').addEventListener('click', () => {
     if (!rating) { showToast('Dê uma nota antes de salvar'); return; }
     const comment = document.getElementById('comIn').value.trim();
@@ -407,22 +921,42 @@ function setupEventListeners() {
     }, 900);
   });
 
+  // Tabs de período no relatório
+  document.querySelectorAll('.rel-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      renderRelatorio(btn.dataset.periodo);
+    });
+  });
+
+  // Botão relatório texto
+  const btnRelTexto = document.getElementById('btnRelTexto');
+  if (btnRelTexto) {
+    btnRelTexto.addEventListener('click', () => mostrarRelatorioTexto(relPeriodo));
+  }
+
+  // Fechar modal de texto
+  const btnFecharModal = document.getElementById('btnFecharModal');
+  if (btnFecharModal) {
+    btnFecharModal.addEventListener('click', () => {
+      document.getElementById('relTextoModal').classList.remove('open');
+    });
+  }
+
+  // Copiar no modal
+  const btnCopiar = document.getElementById('btnCopiarRel');
+  if (btnCopiar) {
+    btnCopiar.addEventListener('click', () => copiarRelatorio(relPeriodo));
+  }
+
   // Ripple
   document.querySelectorAll('.rh').forEach(el => {
     el.addEventListener('click', e => addRipple(el, e));
   });
 
-  /* ════════════════════════════════════════
-     TEMPO REAL — escuta eventos da criança
-     Funciona mesmo se ela estiver em outra aba
-  ════════════════════════════════════════ */
+  /* ── TEMPO REAL ── */
   FalaComigo.on('fc_new_event', (event) => {
     renderFeed();
-
-    // Se o relatório estiver aberto, atualiza também
     if (currentScreen === 'rel') renderRelatorio();
-
-    // Notificação visual de novo evento
     const tipo = event.type === 'sos'   ? '🚨 SOS recebido!'
                : event.type === 'humor' ? '💬 Humor atualizado'
                : '📩 Nova mensagem';
@@ -431,12 +965,9 @@ function setupEventListeners() {
 
   FalaComigo.on('fc_event_updated', () => {
     renderFeed();
-
-    // Se o relatório estiver aberto, atualiza também
     if (currentScreen === 'rel') renderRelatorio();
   });
 
-  /* ── Re-renderiza quando o DevTools limpa tudo ── */
   const _clearLocal = () => { renderFeed(); if (currentScreen === 'rel') renderRelatorio(); };
   window.addEventListener('fc_clear', _clearLocal);
   window.addEventListener('storage', (e) => {
@@ -446,14 +977,6 @@ function setupEventListeners() {
 
 /* ── INIT ── */
 document.addEventListener('DOMContentLoaded', () => {
-  // Carrega nome do perfil
-  const profile = FalaComigo.getProfile();
-  const nameEl  = document.querySelector('.tb-name');
-  if (nameEl) {
-    // Mantém nome da cuidadora fixo, mas mostra o nome da criança na topbar
-    // Você pode customizar isso conforme precisar
-  }
-
   renderFeed();
   renderStars();
   setupEventListeners();
