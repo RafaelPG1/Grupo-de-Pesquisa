@@ -52,7 +52,11 @@ const FalaComigo = (() => {
   }
 
   function today() {
-    return _simulatedDate().toISOString().slice(0, 10); // "YYYY-MM-DD"
+    const d = _simulatedDate();
+    // Usa data LOCAL para evitar bug de UTC-3 virar dia anterior
+    return d.getFullYear() + '-' +
+      String(d.getMonth() + 1).padStart(2,'0') + '-' +
+      String(d.getDate()).padStart(2,'0');
   }
 
   function uid() {

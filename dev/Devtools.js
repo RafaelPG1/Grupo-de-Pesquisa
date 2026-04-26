@@ -62,7 +62,14 @@
                 <div class="fcd-slider-lbl">
                   Ajustar hora <span id="fcd-hour-val">—</span>
                 </div>
-                <input type="range" id="fcd-hour-slider" min="0" max="23" step="1" value="8"/>
+                <input type="range" id="fcd-hour-slider" min="0" max="23" step="1" value="12"/>
+              </div>
+
+              <div class="fcd-slider-row">
+                <div class="fcd-slider-lbl">
+                  Ajustar minuto <span id="fcd-min-val">—</span>
+                </div>
+                <input type="range" id="fcd-min-slider" min="0" max="59" step="1" value="0"/>
               </div>
 
               <div class="fcd-time-grid">
@@ -86,7 +93,7 @@
                 </button>
                 <button class="fcd-ctrl full" id="fcd-resettime">
                   <span class="fcd-ctrl-ico">🔄</span>
-                  <span class="fcd-ctrl-lbl">Voltar ao tempo real</span>
+                  <span class="fcd-ctrl-lbl">Resetar para 01/01/2026 12:00</span>
                 </button>
               </div>
 
@@ -254,91 +261,130 @@
   });
 
   /* ══════════════════════════════════════
-     CONTROLE DE TEMPO
+     CONTROLE DE TEMPO — HORA FIXA
+     Não depende do relógio do notebook.
+     Guarda {year,month,day,hour,minute}
+     no localStorage — congelado até o
+     usuário mudar manualmente.
   ══════════════════════════════════════ */
 
-  const TIME_KEY = 'fc_time_offset';
+  const TIME_KEY  = 'fc_time_offset';  // compatibilidade com state.js
+  const FIXED_KEY = 'fc_fixed_time';   // hora fixa
+
+  const DIAS  = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const MESES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+
+  /* ── lê a hora fixa salva ── */
+  function getFixed() {
+    try {
+      const v = JSON.parse(localStorage.getItem(FIXED_KEY));
+      if (v && v.year) return v;
+    } catch {}
+    return null;
+  }
+
+  /* ── salva hora fixa e sincroniza fc_time_offset para state.js ── */
+  function saveFixed(d) {
+    const v = {
+      year: d.getFullYear(), month: d.getMonth(),
+      day:  d.getDate(),     hour:  d.getHours(), minute: d.getMinutes(),
+    };
+    localStorage.setItem(FIXED_KEY, JSON.stringify(v));
+    // mantém offset sincronizado para state.js ler
+    const off = new Date(v.year, v.month, v.day, v.hour, v.minute, 0, 0).getTime() - Date.now();
+    localStorage.setItem(TIME_KEY, String(off));
+    trigger.classList.add('offset-active');
+  }
+
+  /* ── data simulada atual ── */
+  function getSimulatedDate() {
+    const f = getFixed();
+    if (f) return new Date(f.year, f.month, f.day, f.hour, f.minute, 0, 0);
+    return new Date();
+  }
 
   function getOffset() {
     return parseInt(localStorage.getItem(TIME_KEY) || '0', 10);
   }
 
-  function setOffset(ms) {
-    localStorage.setItem(TIME_KEY, String(ms));
-    trigger.classList.toggle('offset-active', ms !== 0);
+  /* ── só muda hora/min, mantém o dia ── */
+  function setFixedHour(h, m) {
+    const cur  = getSimulatedDate();
+    saveFixed(new Date(cur.getFullYear(), cur.getMonth(), cur.getDate(), h, m, 0, 0));
+    updateClock(); updateStats(); _notifyRerender();
   }
 
-  function getSimulatedDate() {
-    return new Date(Date.now() + getOffset());
-  }
-
-  function shiftTime(minutes) {
-    setOffset(getOffset() + minutes * 60 * 1000);
-    updateClock();
-    updateStats();
-    log(`⏩ ${minutes > 0 ? '+' : ''}${minutes} min`, 'ok');
-    showToast(`Hora: ${minutes > 0 ? '+' : ''}${minutes} min`);
-  }
-
+  /* ── avança/retrocede dias, mantém hora/min ── */
   function shiftDays(days) {
-    setOffset(getOffset() + days * 24 * 60 * 60 * 1000);
-    updateClock();
-    updateStats();
-    log(`📅 ${days > 0 ? '+' : ''}${days} dia`, 'ok');
-    showToast(`Data: ${days > 0 ? '+' : ''}${days} dia`);
+    const next = new Date(getSimulatedDate());
+    next.setDate(next.getDate() + days);
+    saveFixed(next);
+    updateClock(); updateStats(); _notifyRerender();
+    log(`📅 ${days > 0 ? '+' : ''}${days} dia → ${next.getDate()}/${next.getMonth()+1}/${next.getFullYear()}`, 'ok');
+    showToast(`Data: ${days > 0 ? 'próximo dia' : 'dia anterior'}`);
   }
 
+  /* ── avança/retrocede horas ── */
+  function shiftHours(h) {
+    const next = new Date(getSimulatedDate());
+    next.setHours(next.getHours() + h);
+    saveFixed(next);
+    updateClock(); updateStats(); _notifyRerender();
+    log(`⏩ ${h > 0 ? '+' : ''}${h}h`, 'ok');
+    showToast(`Hora: ${h > 0 ? '+' : ''}${h}h`);
+  }
+
+  /* ── reseta para 01/01/2026 12:00 ── */
   function resetTime() {
-    setOffset(0);
-    updateClock();
-    updateStats();
-    log('🔄 Tempo real restaurado', 'info');
-    showToast('Tempo real restaurado');
+    saveFixed(new Date(2026, 0, 1, 12, 0, 0, 0));
+    updateClock(); updateStats(); _notifyRerender();
+    log('🔄 Resetado para 01/01/2026 12:00', 'info');
+    showToast('Resetado: 01/01/2026 12:00');
   }
 
-  const DIAS  = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-  const MESES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
-
+  /* ── atualiza o relógio na UI ── */
   function updateClock() {
     const d  = getSimulatedDate();
-    const h  = String(d.getHours()).padStart(2,'0');
-    const m  = String(d.getMinutes()).padStart(2,'0');
-    document.getElementById('fcd-clock-big').textContent  = `${h}:${m}`;
+    const hh = String(d.getHours()).padStart(2,'0');
+    const mm = String(d.getMinutes()).padStart(2,'0');
+
+    document.getElementById('fcd-clock-big').textContent  = `${hh}:${mm}`;
     document.getElementById('fcd-clock-date').textContent =
       `${d.getDate()} ${MESES[d.getMonth()]} ${d.getFullYear()} — ${DIAS[d.getDay()]}`;
 
     hourSlider.value = d.getHours();
-    document.getElementById('fcd-hour-val').textContent = `${h}:00`;
+    document.getElementById('fcd-hour-val').textContent = `${hh}:${mm}`;
 
-    const off   = getOffset();
-    const offEl = document.getElementById('fcd-clock-offset');
-    if (off === 0) {
-      offEl.textContent = 'Tempo real';
-      offEl.className   = 'fcd-clock-offset zero';
-    } else {
-      const totalH = Math.round(off / 3600000);
-      const dias   = Math.floor(Math.abs(totalH) / 24);
-      const horas  = Math.abs(totalH) % 24;
-      let label    = off > 0 ? '+' : '−';
-      if (dias  > 0) label += `${dias}d `;
-      if (horas > 0) label += `${horas}h`;
-      if (dias === 0 && horas === 0) label = off > 0 ? '+<1h' : '−<1h';
-      offEl.textContent = `Offset: ${label}`;
-      offEl.className   = 'fcd-clock-offset';
+    const minSlider = document.getElementById('fcd-min-slider');
+    if (minSlider) {
+      minSlider.value = d.getMinutes();
+      document.getElementById('fcd-min-val').textContent = mm + ' min';
     }
+
+    const offEl = document.getElementById('fcd-clock-offset');
+    offEl.textContent = `⏸ Fixo: ${hh}:${mm}`;
+    offEl.className   = 'fcd-clock-offset';
   }
 
-  setInterval(updateClock, 1000);
+  // hora fixa — sem setInterval
 
+  /* ── slider de HORA ── */
   hourSlider.addEventListener('input', () => {
-    const target = parseInt(hourSlider.value, 10);
-    const diff   = target - getSimulatedDate().getHours();
-    shiftTime(diff * 60);
-    document.getElementById('fcd-hour-val').textContent = String(target).padStart(2,'0') + ':00';
+    const h = parseInt(hourSlider.value, 10);
+    setFixedHour(h, getSimulatedDate().getMinutes());
   });
 
-  document.getElementById('fcd-minus1h').addEventListener('click',   () => shiftTime(-60));
-  document.getElementById('fcd-plus1h').addEventListener('click',    () => shiftTime(60));
+  /* ── slider de MINUTO ── */
+  const minSliderEl = document.getElementById('fcd-min-slider');
+  if (minSliderEl) {
+    minSliderEl.addEventListener('input', () => {
+      const min = parseInt(minSliderEl.value, 10);
+      setFixedHour(getSimulatedDate().getHours(), min);
+    });
+  }
+
+  document.getElementById('fcd-minus1h').addEventListener('click',   () => shiftHours(-1));
+  document.getElementById('fcd-plus1h').addEventListener('click',    () => shiftHours(1));
   document.getElementById('fcd-prevday').addEventListener('click',   () => shiftDays(-1));
   document.getElementById('fcd-nextday').addEventListener('click',   () => shiftDays(1));
   document.getElementById('fcd-resettime').addEventListener('click', resetTime);
@@ -420,7 +466,13 @@
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   }
 
-  function dateStr(d) { return d.toISOString().slice(0, 10); }
+  function dateStr(d) {
+    // Usa data LOCAL para evitar bug de UTC-3 virar dia anterior
+    const y  = d.getFullYear();
+    const mo = String(d.getMonth() + 1).padStart(2,'0');
+    const dy = String(d.getDate()).padStart(2,'0');
+    return `${y}-${mo}-${dy}`;
+  }
   function timeStr(h, m) {
     return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
   }
@@ -582,12 +634,14 @@
   });
 
   /* ══════════════════════════════════════
-     INIT
+     INIT — padrão 01/01/2026 12:00
   ══════════════════════════════════════ */
+
+  if (!getFixed()) {
+    saveFixed(new Date(2026, 0, 1, 12, 0, 0, 0));
+  }
 
   updateClock();
   updateStats();
-
-  trigger.classList.toggle('offset-active', getOffset() !== 0);
 
 })();

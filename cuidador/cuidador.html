@@ -8,7 +8,7 @@
   <title>ConecTEA — Cuidador</title>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@800;900&family=Nunito:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="cuidador.css"/>
-  <link rel="stylesheet" href="devtools.css"/>
+  <link rel="stylesheet" href="../dev/devtools.css"/>
   <style>
     /* ── barra de navegação inferior do cuidador ── */
     .nav-bar-c {
@@ -110,11 +110,11 @@
 
       <!-- Barra de navegação -->
       <nav class="nav-bar-c">
-        <a href="launcher.html" class="nbc rh">
+        <a href="../launcher.html" class="nbc rh">
           <span class="nbc-ico">🏠</span>
           <span class="nbc-txt">Início</span>
         </a>
-        <a href="index.html" class="nbc primary rh">
+        <a href="../index.html" class="nbc primary rh">
           <span class="nbc-ico">👧</span>
           <span class="nbc-txt">Tela da Criança</span>
         </a>
@@ -234,9 +234,9 @@
 <div class="toast" id="toast"></div>
 
 <!-- state.js ANTES do cuidador.js -->
-<script src="state.js"></script>
-<script src="cuidador.js"></script>
-<script src="devtools.js"></script>
+<script src="../state.js"></script>
+<script src="./cuidador.js"></script>
+<script src="../dev/devtools.js"></script>
 <script>
   /* Esconde a nav bar quando está dentro de um iframe (modo tela dupla) */
   if (window.self !== window.top) {
