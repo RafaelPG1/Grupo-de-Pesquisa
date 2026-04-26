@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Fala Comigo — Início</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800;900&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:      #2DAF78;
+      --green-dark: #1E7F58;
+      --green-deep: #0d3d26;
+      --green-mid:  #1a5c3a;
+      --white:      #ffffff;
+      --radius:     22px;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Nunito', sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(145deg, #0d3d26 0%, #1a5c3a 55%, #0d3d26 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ── Blobs decorativos ── */
+    .bg-blob {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: floatBlob 8s ease-in-out infinite;
+    }
+    .bg-blob1 { width: 420px; height: 420px; background: rgba(45,175,120,.07); top: -120px; left: -120px; animation-delay: 0s; }
+    .bg-blob2 { width: 300px; height: 300px; background: rgba(45,175,120,.05); bottom: -80px; right: -80px; animation-delay: -3s; }
+    .bg-blob3 { width: 180px; height: 180px; background: rgba(255,255,255,.04); top: 40%; left: -40px; animation-delay: -5s; }
+
+    @keyframes floatBlob {
+      0%, 100% { transform: translate(0,0) scale(1); }
+      50%       { transform: translate(12px,-18px) scale(1.04); }
+    }
+
+    /* ── Container principal ── */
+    .launcher {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      animation: launchIn .7s cubic-bezier(.34,1.4,.64,1) both;
+    }
+
+    @keyframes launchIn {
+      from { opacity: 0; transform: translateY(30px) scale(.96); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* ── Logo ── */
+    .logo-fox {
+      font-size: 52px;
+      line-height: 1;
+      margin-bottom: 8px;
+      animation: floatFox 3s ease-in-out infinite;
+      filter: drop-shadow(0 8px 24px rgba(0,0,0,.3));
+    }
+
+    @keyframes floatFox {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-10px); }
+    }
+
+    .logo-name {
+      font-family: 'Baloo 2', cursive;
+      font-size: 2rem;
+      font-weight: 900;
+      color: rgba(255,255,255,.9);
+      letter-spacing: -.5px;
+      margin-bottom: 32px;
+      text-shadow: 0 2px 12px rgba(0,0,0,.3);
+    }
+
+    /* ── Relógio ── */
+    .clock-card {
+      background: rgba(255,255,255,.1);
+      border: 1.5px solid rgba(255,255,255,.18);
+      border-radius: 28px;
+      padding: 28px 48px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      margin-bottom: 28px;
+      min-width: 260px;
+      box-shadow: 0 16px 48px rgba(0,0,0,.25);
+      animation: launchIn .7s cubic-bezier(.34,1.4,.64,1) .1s both;
+    }
+
+    .clock-time {
+      font-family: 'Baloo 2', cursive;
+      font-size: 3.6rem;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -2px;
+      line-height: 1;
+      text-shadow: 0 2px 16px rgba(0,0,0,.3);
+    }
+
+    .clock-time .colon {
+      opacity: 1;
+      animation: blinkColon 1s step-end infinite;
+    }
+
+    @keyframes blinkColon {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: .2; }
+    }
+
+    .clock-date {
+      font-size: .95rem;
+      font-weight: 800;
+      color: rgba(255,255,255,.75);
+      text-transform: capitalize;
+      letter-spacing: .3px;
+    }
+
+    .clock-day {
+      font-size: .8rem;
+      font-weight: 700;
+      color: rgba(255,255,255,.5);
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+    }
+
+    /* ── Botões ── */
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 320px;
+      animation: launchIn .7s cubic-bezier(.34,1.4,.64,1) .2s both;
+    }
+
+    .btn-main {
+      width: 100%;
+      border: none;
+      border-radius: var(--radius);
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s, opacity .15s;
+      position: relative;
+      overflow: hidden;
+      text-decoration: none;
+    }
+
+    .btn-main:hover  { transform: translateY(-2px); }
+    .btn-main:active { transform: scale(.96); opacity: .9; }
+
+    .btn-main.dual {
+      background: var(--green);
+      box-shadow: 0 8px 28px rgba(45,175,120,.45);
+    }
+    .btn-main.child {
+      background: rgba(255,255,255,.12);
+      border: 1.5px solid rgba(255,255,255,.2);
+      backdrop-filter: blur(8px);
+    }
+    .btn-main.carer {
+      background: rgba(255,255,255,.08);
+      border: 1.5px solid rgba(255,255,255,.14);
+      backdrop-filter: blur(8px);
+    }
+
+    .btn-ico {
+      font-size: 28px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .btn-info {
+      flex: 1;
+      text-align: left;
+    }
+
+    .btn-label {
+      font-size: .9rem;
+      font-weight: 900;
+      color: #fff;
+      display: block;
+      line-height: 1.2;
+    }
+
+    .btn-sub {
+      font-size: .72rem;
+      font-weight: 700;
+      color: rgba(255,255,255,.65);
+      display: block;
+      margin-top: 2px;
+    }
+
+    .btn-arrow {
+      font-size: 18px;
+      color: rgba(255,255,255,.7);
+      flex-shrink: 0;
+    }
+
+    /* Pulso no botão dual */
+    .btn-pulse {
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,.1);
+      animation: btnPulse 2.5s ease-in-out infinite;
+    }
+
+    @keyframes btnPulse {
+      0%, 100% { opacity: 0; }
+      50%       { opacity: 1; }
+    }
+
+    /* ── Divider ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+    }
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,.15);
+    }
+    .divider span {
+      font-size: 10px;
+      font-weight: 800;
+      color: rgba(255,255,255,.35);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* ── Ripple ── */
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      transform: scale(0);
+      background: rgba(255,255,255,.25);
+      pointer-events: none;
+      animation: rippleAnim 450ms ease-out forwards;
+    }
+
+    @keyframes rippleAnim {
+      to { transform: scale(4.5); opacity: 0; }
+    }
+
+    /* ══════════════════════════════════════════
+       MODO TELA DUPLA
+    ══════════════════════════════════════════ */
+
+    /* Overlay que cobre tudo quando ativa o modo duplo */
+    .dual-overlay {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(145deg, #0a2e1c 0%, #12432a 100%);
+      z-index: 100;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .dual-overlay.active { display: flex; }
+
+    /* Topbar do modo duplo */
+    .dual-topbar {
+      background: rgba(0,0,0,.25);
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .dual-title {
+      font-family: 'Baloo 2', cursive;
+      font-size: 1rem;
+      font-weight: 900;
+      color: rgba(255,255,255,.8);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dual-title span { font-size: 16px; }
+
+    .dual-close {
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 900;
+      padding: 6px 14px;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      transition: background .15s;
+    }
+    .dual-close:hover { background: rgba(255,255,255,.2); }
+
+    /* Labels das telas */
+    .dual-labels {
+      display: flex;
+      padding: 8px 20px 0;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .dual-label {
+      flex: 1;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 900;
+      color: rgba(255,255,255,.5);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    /* Container dos dois iframes */
+    .dual-frames {
+      flex: 1;
+      display: flex;
+      gap: 12px;
+      padding: 8px 12px 12px;
+      overflow: hidden;
+    }
+
+    .frame-wrap {
+      flex: 1;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow:
+        0 24px 60px rgba(0,0,0,.5),
+        0 0 0 1.5px rgba(255,255,255,.1);
+      background: #fff;
+      position: relative;
+    }
+
+    .frame-wrap iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* Indicador de atividade no frame do cuidador */
+    .frame-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: var(--green);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 900;
+      padding: 3px 9px;
+      border-radius: 100px;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      opacity: 0;
+      transition: opacity .3s;
+      pointer-events: none;
+    }
+    .frame-badge.show { opacity: 1; }
+
+    /* Responsivo: em telas pequenas, empilha */
+    @media (max-width: 700px) {
+      .dual-frames { flex-direction: column; gap: 8px; padding: 6px 8px 8px; }
+      .frame-wrap  { flex: none; height: calc(50% - 4px); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Blobs de fundo -->
+<div class="bg-blob bg-blob1"></div>
+<div class="bg-blob bg-blob2"></div>
+<div class="bg-blob bg-blob3"></div>
+
+<!-- Launcher principal -->
+<div class="launcher">
+
+  <div class="logo-fox">🦊</div>
+  <div class="logo-name">Fala Comigo</div>
+
+  <!-- Relógio -->
+  <div class="clock-card">
+    <div class="clock-time" id="clockTime">
+      <span id="clockH">00</span><span class="colon">:</span><span id="clockM">00</span>
+    </div>
+    <div class="clock-date" id="clockDate">carregando...</div>
+    <div class="clock-day"  id="clockDay">—</div>
+  </div>
+
+  <!-- Botões -->
+  <div class="btn-group">
+
+    <!-- Tela Dupla (destaque) -->
+    <button class="btn-main dual" id="btnDual">
+      <div class="btn-pulse"></div>
+      <span class="btn-ico">📱</span>
+      <div class="btn-info">
+        <span class="btn-label">Tela Dupla</span>
+        <span class="btn-sub">Criança + Cuidador lado a lado</span>
+      </div>
+      <span class="btn-arrow">→</span>
+    </button>
+
+    <div class="divider"><span>ou acesse separado</span></div>
+
+    <!-- Tela da criança -->
+    <a href="index.html" class="btn-main child">
+      <span class="btn-ico">👧</span>
+      <div class="btn-info">
+        <span class="btn-label">Tela da Criança</span>
+        <span class="btn-sub">Interface de comunicação</span>
+      </div>
+      <span class="btn-arrow">→</span>
+    </a>
+
+    <!-- Tela do cuidador -->
+    <a href="cuidador.html" class="btn-main carer">
+      <span class="btn-ico">👩‍🏫</span>
+      <div class="btn-info">
+        <span class="btn-label">Tela do Cuidador</span>
+        <span class="btn-sub">Feed de eventos e relatórios</span>
+      </div>
+      <span class="btn-arrow">→</span>
+    </a>
+
+  </div>
+</div>
+
+<!-- ══ MODO TELA DUPLA ══ -->
+<div class="dual-overlay" id="dualOverlay">
+
+  <div class="dual-topbar">
+    <div class="dual-title">
+      <span>📱</span> Modo Tela Dupla
+    </div>
+    <button class="dual-close" id="dualClose">✕ Fechar</button>
+  </div>
+
+  <div class="dual-labels">
+    <div class="dual-label">👧 Criança</div>
+    <div class="dual-label">👩‍🏫 Cuidador</div>
+  </div>
+
+  <div class="dual-frames">
+    <div class="frame-wrap">
+      <iframe id="frameChild" src="index.html" title="Tela da Criança"></iframe>
+    </div>
+    <div class="frame-wrap">
+      <iframe id="frameCarer" src="cuidador.html" title="Tela do Cuidador"></iframe>
+      <div class="frame-badge" id="carerBadge">● novo</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+'use strict';
+
+/* ── RELÓGIO ── */
+const DIAS   = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+const MESES  = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+
+function updateClock() {
+  const now  = new Date();
+  const h    = String(now.getHours()).padStart(2, '0');
+  const m    = String(now.getMinutes()).padStart(2, '0');
+  const dia  = now.getDate();
+  const mes  = MESES[now.getMonth()];
+  const ano  = now.getFullYear();
+  const semana = DIAS[now.getDay()];
+
+  document.getElementById('clockH').textContent = h;
+  document.getElementById('clockM').textContent = m;
+  document.getElementById('clockDate').textContent = `${dia} de ${mes} de ${ano}`;
+  document.getElementById('clockDay').textContent  = semana;
+}
+
+updateClock();
+setInterval(updateClock, 1000);
+
+/* ── RIPPLE ── */
+function spawnRipple(btn, e) {
+  const rect = btn.getBoundingClientRect();
+  const x = (e.clientX || rect.left + rect.width/2) - rect.left;
+  const y = (e.clientY || rect.top  + rect.height/2) - rect.top;
+  const size = Math.max(rect.width, rect.height) * 2;
+  const r = document.createElement('span');
+  r.className = 'ripple';
+  r.style.cssText = `width:${size}px;height:${size}px;left:${x-size/2}px;top:${y-size/2}px;`;
+  btn.appendChild(r);
+  r.addEventListener('animationend', () => r.remove());
+}
+
+document.querySelectorAll('.btn-main').forEach(btn => {
+  btn.addEventListener('pointerdown', e => spawnRipple(btn, e));
+});
+
+/* ── MODO TELA DUPLA ── */
+const overlay   = document.getElementById('dualOverlay');
+const btnDual   = document.getElementById('btnDual');
+const dualClose = document.getElementById('dualClose');
+const carerBadge = document.getElementById('carerBadge');
+let badgeTimer = null;
+
+btnDual.addEventListener('click', () => {
+  overlay.classList.add('active');
+  // Garante que os iframes usam a versão mais recente
+  document.getElementById('frameChild').src = 'index.html';
+  document.getElementById('frameCarer').src = 'cuidador.html';
+});
+
+dualClose.addEventListener('click', () => {
+  overlay.classList.remove('active');
+});
+
+// Fecha com Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') overlay.classList.remove('active');
+});
+
+/* ── BADGE "novo" no frame do cuidador ──
+   Escuta o localStorage: quando a criança envia algo,
+   pisca o badge para indicar nova atividade.
+── */
+window.addEventListener('storage', (e) => {
+  if (!e.key || !e.key.startsWith('fc_')) return;
+  if (!overlay.classList.contains('active')) return;
+
+  carerBadge.classList.add('show');
+  clearTimeout(badgeTimer);
+  badgeTimer = setTimeout(() => carerBadge.classList.remove('show'), 3000);
+});
+</script>
+<link rel="stylesheet" href="devtools.css"/>
+<script src="state.js"></script>
+<script src="devtools.js"></script>
+</body>
+</html>

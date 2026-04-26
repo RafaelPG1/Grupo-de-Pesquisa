@@ -1,0 +1,193 @@
+<!-- index.html — criança -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Fala Comigo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800;900&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    /* ── barra de navegação inferior ── */
+    .nav-bar {
+      display: flex;
+      gap: 10px;
+      padding: 12px 16px 16px;
+      background: var(--bg);
+      border-top: 1.5px solid var(--border);
+    }
+
+    .nav-btn {
+      flex: 1;
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      background: var(--white);
+      padding: 10px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .15s, border-color .15s, transform .15s;
+    }
+    .nav-btn:active { transform: scale(.94); }
+
+    .nav-btn.primary {
+      background: var(--green);
+      border-color: var(--green);
+    }
+
+    .nav-btn-ico  { font-size: 18px; line-height: 1; }
+    .nav-btn-txt  {
+      font-family: 'Nunito', sans-serif;
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--text);
+      line-height: 1.2;
+    }
+    .nav-btn.primary .nav-btn-txt { color: #fff; }
+  </style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="notch"><div class="notch-pill"></div></div>
+
+  <div class="app">
+
+    <!-- ══ SPLASH ══ -->
+    <section class="screen" id="splash">
+      <div class="sp-blob sp-blob1"></div>
+      <div class="sp-blob sp-blob2"></div>
+      <div class="sp-blob sp-blob3"></div>
+      <div class="splash-inner">
+        <div class="fox-bubble">🦊</div>
+        <h1 class="sp-title">Fala Comigo</h1>
+        <p class="sp-sub">Comunicação fácil para todos</p>
+        <div class="sp-dots">
+          <div class="sp-dot active"></div>
+          <div class="sp-dot"></div>
+          <div class="sp-dot"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ MAIN ══ -->
+    <section class="screen" id="main">
+
+      <div class="header">
+        <div class="avatar-ring">👧</div>
+        <div class="hdr-name">Maria</div>
+        <div class="hdr-wave"></div>
+      </div>
+
+      <div class="body">
+
+        <!-- HUMOR -->
+        <div class="sec-block">
+          <div class="sec-label">Como estou</div>
+          <div class="humor-grid">
+            <button class="emo-btn ripple-host" data-mood="bem" data-msg="😄 Estou bem!">
+              <span class="emo-face">😄</span>
+              <span class="emo-name">Bem</span>
+            </button>
+            <button class="emo-btn ripple-host" data-mood="normal" data-msg="😐 Estou normal.">
+              <span class="emo-face">😐</span>
+              <span class="emo-name">Normal</span>
+            </button>
+            <button class="emo-btn ripple-host" data-mood="mal" data-msg="😢 Estou mal.">
+              <span class="emo-face">😢</span>
+              <span class="emo-name">Mal</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- NECESSIDADES -->
+        <div class="sec-block">
+          <div class="sec-label">Preciso de…</div>
+          <div class="needs-grid">
+
+            <button class="need-btn ripple-host" data-need="agua" data-msg="💧 Preciso de água!">
+              <span class="need-icon">💧</span>
+              <span class="need-text">Água</span>
+            </button>
+            <button class="need-btn ripple-host" data-need="banheiro" data-msg="🚻 Preciso do banheiro!">
+              <span class="need-icon">🚻</span>
+              <span class="need-text">Banheiro</span>
+            </button>
+            <button class="need-btn ripple-host" data-need="descanso" data-msg="😴 Quero descansar.">
+              <span class="need-icon">😴</span>
+              <span class="need-text">Descansar</span>
+            </button>
+            <button class="need-btn ripple-host" data-need="abraco" data-msg="🤗 Quero um abraço!">
+              <span class="need-icon">🤗</span>
+              <span class="need-text">Abraço</span>
+            </button>
+
+            <!-- botão ver mais -->
+            <button class="ver-mais-btn ripple-host" id="verMaisBtn">
+              <span class="ver-mais-label" id="verMaisLabel">ver mais opções</span>
+              <span class="ver-mais-arrow" id="verMaisArrow">↓</span>
+            </button>
+
+            <!-- extras inline -->
+            <div class="extras-row" id="extrasRow">
+              <div class="extras-inner">
+                <button class="need-btn ripple-host" data-need="silencio" data-msg="🔇 Preciso de silêncio.">
+                  <span class="need-icon">🔇</span>
+                  <span class="need-text">Silêncio</span>
+                </button>
+                <button class="need-btn ripple-host" data-need="ir-embora" data-msg="🚪 Quero ir embora.">
+                  <span class="need-icon">🚪</span>
+                  <span class="need-text">Ir embora</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SOS -->
+        <div class="sec-block">
+          <button class="sos-btn ripple-host" id="sosBtn">
+            <div class="sos-pulse"></div>
+            <span class="sos-icon">🆘</span>
+            <span class="sos-label">AJUDA</span>
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ── barra de navegação ── -->
+  <nav class="nav-bar">
+    <a href="launcher.html" class="nav-btn ripple-host">
+      <span class="nav-btn-ico">🏠</span>
+      <span class="nav-btn-txt">Início</span>
+    </a>
+    <a href="cuidador.html" class="nav-btn primary ripple-host">
+      <span class="nav-btn-ico">👩‍🏫</span>
+      <span class="nav-btn-txt">Área do Cuidador</span>
+    </a>
+  </nav>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<link rel="stylesheet" href="devtools.css"/>
+<!-- state.js ANTES do script.js -->
+<script src="state.js"></script>
+<script src="script.js"></script>
+<script src="devtools.js"></script>
+<script>
+  /* Esconde a nav bar quando está dentro de um iframe (modo tela dupla) */
+  if (window.self !== window.top) {
+    document.querySelector('.nav-bar').style.display = 'none';
+  }
+</script>
+</body>
+</html>

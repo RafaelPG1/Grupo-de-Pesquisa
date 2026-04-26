@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Fala Comigo — Cuidador</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@800;900&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="cuidador.css"/>
+  <link rel="stylesheet" href="devtools.css"/>
+  <style>
+    /* ── barra de navegação inferior do cuidador ── */
+    .nav-bar-c {
+      display: flex;
+      gap: 10px;
+      padding: 12px 14px 16px;
+      background: var(--bg);
+      border-top: 1.5px solid var(--bd);
+      flex-shrink: 0;
+    }
+    .nbc {
+      flex: 1;
+      border: 2px solid var(--bd);
+      border-radius: 16px;
+      background: var(--sf);
+      padding: 10px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      text-decoration: none;
+      font-family: 'Nunito', sans-serif;
+      transition: background .15s, border-color .15s, transform .15s;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .nbc:active { transform: scale(.94); }
+    .nbc.primary { background: var(--verde); border-color: var(--verde); }
+    .nbc-ico { font-size: 18px; line-height: 1; }
+    .nbc-txt { font-size: 12px; font-weight: 900; color: var(--tx); line-height: 1.2; }
+    .nbc.primary .nbc-txt { color: #fff; }
+  </style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="notch"><div class="notch-p"></div></div>
+  <div class="app">
+
+    <!-- TELA 1 — FEED PRINCIPAL -->
+    <section class="screen active" id="s-feed">
+
+      <div class="topbar">
+        <div class="tb-row">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="av">👩‍🏫</div>
+            <div class="tb-info">
+              <p class="tb-label">Cuidadora</p>
+              <p class="tb-name">Ana Silva</p>
+              <div class="tb-chips">
+                <span class="chip">UMKids</span>
+                <span class="chip">CEI Central</span>
+              </div>
+            </div>
+          </div>
+          <div class="tb-icons">
+            <button class="ib" id="btnRel" title="Relatórios">📊</button>
+            <button class="ib" id="btnCo" title="Fechar dia">✅</button>
+          </div>
+        </div>
+      </div>
+      <div class="curve"></div>
+
+      <!-- ALERTA SOS -->
+      <div class="sos-wrap">
+        <div class="sos-card hidden" id="sosAlert">
+          <div class="sos-ico">🚨</div>
+          <div class="sos-tx">
+            <p class="sos-t">SOS — Maria</p>
+            <p class="sos-s">Agora mesmo · Toque para agir</p>
+          </div>
+          <button class="sos-cl" id="sosDismiss">✕</button>
+        </div>
+      </div>
+
+      <!-- SUGESTÃO AUTOMÁTICA -->
+      <div class="sug-wrap">
+        <div class="sug hidden" id="sugCard">
+          <div class="sug-h">
+            <span style="font-size:15px">💡</span>
+            <span class="sug-lbl">Sugestão agora</span>
+          </div>
+          <p class="sug-tx" id="sugTx">Aguardando interações...</p>
+          <button class="sug-ok" id="sugDismiss">entendido ✓</button>
+        </div>
+      </div>
+
+      <!-- FEED DE EVENTOS -->
+      <div class="sec-header">
+        <span class="sec-t">📋 Eventos de hoje</span>
+        <span class="count-pill" id="feedCount">0</span>
+      </div>
+      <div class="feed" id="feed"></div>
+
+      <!-- Barra de navegação -->
+      <nav class="nav-bar-c">
+        <a href="launcher.html" class="nbc rh">
+          <span class="nbc-ico">🏠</span>
+          <span class="nbc-txt">Início</span>
+        </a>
+        <a href="index.html" class="nbc primary rh">
+          <span class="nbc-ico">👧</span>
+          <span class="nbc-txt">Tela da Criança</span>
+        </a>
+      </nav>
+
+    </section>
+
+    <!-- TELA 2 — DETALHES DO EVENTO -->
+    <section class="screen" id="s-detail">
+
+      <div class="dh">
+        <button class="bk" id="bk1">←</button>
+        <span class="dh-t">Detalhes do evento</span>
+        <span style="width:36px"></span>
+      </div>
+      <div class="dh-curve"></div>
+
+      <div class="db">
+        <div class="d-hero">
+          <span class="d-hero-ico" id="dIco">😟</span>
+          <p class="d-hero-msg" id="dMsg">—</p>
+          <p class="d-hero-time" id="dTime">🕒 —</p>
+        </div>
+
+        <div class="d-cards">
+          <div class="dc"><p class="dc-l">Emoção</p><p class="dc-v" id="dEmo">—</p></div>
+          <div class="dc"><p class="dc-l">Pedido</p><p class="dc-v" id="dPed">—</p></div>
+          <div class="dc full"><p class="dc-l">💡 Sugestão automática</p><p class="dc-v" id="dSug">—</p></div>
+        </div>
+
+        <p class="act-l">Ação rápida</p>
+        <div class="act-g">
+          <button class="ab gn rh" data-a="resolvido"><span class="ab-ico">✔</span><span class="ab-tx">Resolvido</span></button>
+          <button class="ab yn rh" data-a="acompanhar"><span class="ab-ico">⏳</span><span class="ab-tx">Acompanhar</span></button>
+          <button class="ab bl rh full" id="btnNota"><span class="ab-ico">📝</span><span class="ab-tx">Adicionar nota</span></button>
+        </div>
+
+        <div class="nota-box" id="notaBox">
+          <textarea class="nota-in" id="notaIn" placeholder="O que aconteceu? Como reagiu?" rows="3"></textarea>
+          <button class="nota-sv rh" id="notaSv">Salvar nota</button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- TELA 3 — CHECK-OUT DO DIA -->
+    <section class="screen" id="s-checkout">
+
+      <div class="dh">
+        <button class="bk" id="bk2">←</button>
+        <span class="dh-t">Fechar o dia</span>
+        <span style="width:36px"></span>
+      </div>
+      <div class="dh-curve"></div>
+
+      <div class="co-b">
+        <div class="co-h">
+          <span class="co-em">📋</span>
+          <p class="co-t">Como foi hoje?</p>
+          <p class="co-s">Leva menos de 30 segundos ⚡</p>
+        </div>
+
+        <div class="rat-blk">
+          <p class="rat-l">⭐ Nota do dia</p>
+          <div class="rat-stars" id="ratStars"></div>
+          <p class="rat-v" id="ratV">—</p>
+        </div>
+
+        <div class="com-blk">
+          <p class="com-l">📝 Comentário (opcional)</p>
+          <textarea class="com-in" id="comIn"
+            placeholder="Ex: teve dificuldade no recreio, mas melhorou depois..."
+            rows="3"></textarea>
+        </div>
+
+        <button class="co-sv rh" id="coSv">Salvar e fechar ✓</button>
+      </div>
+
+    </section>
+
+    <!-- TELA 4 — RELATÓRIOS -->
+    <section class="screen" id="s-rel">
+
+      <div class="dh">
+        <button class="bk" id="bk3">←</button>
+        <span class="dh-t">Relatórios</span>
+        <span style="width:36px"></span>
+      </div>
+      <div class="dh-curve"></div>
+
+      <div class="rel-b">
+        <div class="stat-row">
+          <div class="sc"><p class="sc-v" id="statEventos">0</p><p class="sc-l">Eventos hoje</p></div>
+          <div class="sc red"><p class="sc-v" id="statSOS">0</p><p class="sc-l">SOS hoje</p></div>
+          <div class="sc grn"><p class="sc-v" id="statNota">—</p><p class="sc-l">Nota do dia</p></div>
+        </div>
+
+        <p class="rel-st">📈 Humor desta semana</p>
+        <div class="hc" id="humorChart"></div>
+
+        <p class="rel-st">⏰ Horários críticos</p>
+        <div class="crit">
+          <div class="crit-i"><span class="crit-t">09:30</span><span class="crit-d">Chegada — ansiedade alta</span></div>
+          <div class="crit-i"><span class="crit-t">12:15</span><span class="crit-d">Recreio — barulho excessivo</span></div>
+          <div class="crit-i"><span class="crit-t">15:00</span><span class="crit-d">Troca de atividade — resistência</span></div>
+        </div>
+
+        <p class="rel-st">🙋 Necessidades mais pedidas</p>
+        <div class="ndc" id="needsChart"></div>
+      </div>
+
+    </section>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- state.js ANTES do cuidador.js -->
+<script src="state.js"></script>
+<script src="cuidador.js"></script>
+<script src="devtools.js"></script>
+<script>
+  /* Esconde a nav bar quando está dentro de um iframe (modo tela dupla) */
+  if (window.self !== window.top) {
+    const nav = document.querySelector('.nav-bar-c');
+    if (nav) nav.style.display = 'none';
+  }
+</script>
+</body>
+</html>
