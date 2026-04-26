@@ -154,3 +154,12 @@ function showToast(msg, duration = 2600) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => toast.classList.remove('show'), duration);
 }
+
+/* ── Re-renderiza humor selecionado quando DevTools limpa tudo ── */
+function _onClear() {
+  document.querySelectorAll('.emo-btn').forEach(b => b.classList.remove('sel'));
+}
+window.addEventListener('fc_clear', _onClear);
+window.addEventListener('storage', (e) => {
+  if (e.key === 'fc_evt_fc_clear' && e.newValue) _onClear();
+});

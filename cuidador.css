@@ -31,7 +31,7 @@ body {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  background: #1a1a1a;
+    background: linear-gradient(145deg, #0d3d26 0%, #1a5c3a 60%, #0d3d26 100%);
   padding: 28px 16px 52px;
 }
 
@@ -248,7 +248,7 @@ textarea, input { font-family: inherit; resize: none; }
 
 /* container branco do feed — igual imagem 2 */
 .feed-outer {
-  margin: 0 16px;
+  margin: 0 16px 12px;
   background: #fff;
   border-radius: 18px;
   border: 1px solid var(--bd);

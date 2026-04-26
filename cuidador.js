@@ -160,12 +160,22 @@ function getSugestaoNeed(need) {
 function abrirDetalhe(e) {
   currentEventId = e.id;
 
+  // Busca o humor mais recente do dia (anterior ou igual ao horário do evento)
+  const todayEvents = FalaComigo.getEvents(true);
+  const lastHumor   = todayEvents.find(ev =>
+    ev.type === 'humor' && ev.time <= e.time && ev.id !== e.id
+  ) || todayEvents.find(ev => ev.type === 'humor');
+
   document.getElementById('dIco').textContent  = e.icon;
   document.getElementById('dMsg').textContent  = e.message;
   document.getElementById('dTime').textContent = '🕒 ' + e.time;
-  document.getElementById('dEmo').textContent  = e.type === 'humor'
-    ? e.icon + ' ' + ({ bem: 'Bem', normal: 'Normal', mal: 'Mal' }[e.mood] || '—')
+
+  // Emoção: se o evento é humor usa o próprio, senão busca o humor mais recente do dia
+  const humorRef = e.type === 'humor' ? e : lastHumor;
+  document.getElementById('dEmo').textContent  = humorRef
+    ? humorRef.icon + ' ' + ({ bem: 'Bem', normal: 'Normal', mal: 'Mal' }[humorRef.mood] || '—')
     : '—';
+
   document.getElementById('dPed').textContent  = e.type === 'need'
     ? e.icon + ' ' + e.message.replace(/^[^\s]+\s/, '')
     : '—';
@@ -424,6 +434,13 @@ function setupEventListeners() {
 
     // Se o relatório estiver aberto, atualiza também
     if (currentScreen === 'rel') renderRelatorio();
+  });
+
+  /* ── Re-renderiza quando o DevTools limpa tudo ── */
+  const _clearLocal = () => { renderFeed(); if (currentScreen === 'rel') renderRelatorio(); };
+  window.addEventListener('fc_clear', _clearLocal);
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'fc_evt_fc_clear' && e.newValue) _clearLocal();
   });
 }
 

@@ -37,6 +37,7 @@
           <button class="fcd-close" id="fcd-close-btn">✕ Fechar</button>
         </div>
 
+        <!-- ÁREA COM SCROLL — flex:1 + min-height:0 -->
         <div class="fcd-body">
 
           <!-- STATS -->
@@ -50,6 +51,7 @@
           <div class="fcd-card">
             <div class="fcd-card-hd">🕐 Controle de Tempo</div>
             <div class="fcd-card-bd">
+
               <div class="fcd-clock">
                 <div class="fcd-clock-big" id="fcd-clock-big">00:00</div>
                 <div class="fcd-clock-date" id="fcd-clock-date">—</div>
@@ -87,6 +89,7 @@
                   <span class="fcd-ctrl-lbl">Voltar ao tempo real</span>
                 </button>
               </div>
+
             </div>
           </div>
 
@@ -154,9 +157,9 @@
             </div>
           </div>
 
-        </div>
-      </div>
-    </div>
+        </div><!-- /fcd-body -->
+      </div><!-- /fc-devtools-modal -->
+    </div><!-- /fc-devtools-overlay -->
 
     <button id="fc-devtools-trigger" title="DevTools (🛠️)">🛠️</button>
     <div id="fc-devtools-toast"></div>
@@ -194,23 +197,19 @@
 
   function openModal() {
     overlay.classList.add('open');
-    document.body.style.overflow = 'hidden'; /* trava scroll da página por baixo */
     updateClock();
     updateStats();
   }
 
   function closeModal() {
     overlay.classList.remove('open');
-    document.body.style.overflow = '';
   }
 
   trigger.addEventListener('click', openModal);
   closeBtn.addEventListener('click', closeModal);
 
   /* Clica no backdrop (fora do modal) para fechar */
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) closeModal();
-  });
+
 
   /* Escape fecha */
   document.addEventListener('keydown', (e) => {
@@ -472,9 +471,20 @@
     return newEvents.length;
   }
 
+  /* Dispara fc_new_event para notificar todas as abas/iframes */
+  function _notifyRerender() {
+    try {
+      const payload = JSON.stringify({ detail: {}, ts: Date.now() });
+      localStorage.setItem('fc_evt_fc_new_event', payload);
+      setTimeout(() => localStorage.removeItem('fc_evt_fc_new_event'), 200);
+      window.dispatchEvent(new CustomEvent('fc_new_event', { detail: {} }));
+    } catch {}
+  }
+
   function genDay(type) {
     const count = injectScenario(SCENARIOS[type], getSimulatedDate());
     updateStats();
+    _notifyRerender();
     log(`🎲 Cenário "${type}": ${count} eventos em ${dateStr(getSimulatedDate())}`, 'ok');
     showToast(`✅ ${count} eventos gerados!`);
   }
@@ -491,6 +501,7 @@
       log(`📅 ${dateStr(d)}: "${type}"`, 'info');
     }
     updateStats();
+    _notifyRerender();
     log(`✅ Semana completa: ${total} eventos`, 'ok');
     showToast(`📆 Semana gerada! ${total} eventos`);
   }
@@ -543,6 +554,7 @@
         if (data.fc_time_offset)   setOffset(data.fc_time_offset);
         updateStats();
         updateClock();
+        _notifyRerender();
         log(`📥 Importado: ${(data.fc_events||[]).length} eventos`, 'ok');
         showToast('📥 Dados importados!');
       } catch {
@@ -560,6 +572,13 @@
     updateStats();
     log('🗑️ Dados apagados', 'warn');
     showToast('🗑️ Dados apagados');
+
+    /* ── Notifica todas as abas/iframes para re-renderizar ── */
+    try {
+      localStorage.setItem('fc_evt_fc_clear', JSON.stringify({ detail: {}, ts: Date.now() }));
+      setTimeout(() => localStorage.removeItem('fc_evt_fc_clear'), 200);
+      window.dispatchEvent(new CustomEvent('fc_clear', { detail: {} }));
+    } catch {}
   });
 
   /* ══════════════════════════════════════
