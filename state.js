@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════
-   state.js — Fala Comigo
+   state.js — ConecTEA
    Gerenciador central de estado compartilhado.
    Usa localStorage para persistir eventos entre
    as telas da criança e do cuidador.

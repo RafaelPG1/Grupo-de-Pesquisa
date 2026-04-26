@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Fala Comigo — Cuidador</title>
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@800;900&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet"/>
+  <title>ConecTEA — Cuidador</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@800;900&family=Nunito:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="cuidador.css"/>
   <link rel="stylesheet" href="devtools.css"/>
   <style>
@@ -52,7 +52,7 @@
 
       <div class="topbar">
         <div class="tb-row">
-          <div style="display:flex;align-items:center;gap:10px">
+          <div style="display:flex;align-items:center;gap:14px">
             <div class="av">👩‍🏫</div>
             <div class="tb-info">
               <p class="tb-label">Cuidadora</p>
@@ -74,7 +74,7 @@
       <!-- ALERTA SOS -->
       <div class="sos-wrap">
         <div class="sos-card hidden" id="sosAlert">
-          <div class="sos-ico">🚨</div>
+          <div class="sos-ico-box">🚨</div>
           <div class="sos-tx">
             <p class="sos-t">SOS — Maria</p>
             <p class="sos-s">Agora mesmo · Toque para agir</p>
@@ -87,7 +87,7 @@
       <div class="sug-wrap">
         <div class="sug hidden" id="sugCard">
           <div class="sug-h">
-            <span style="font-size:15px">💡</span>
+            <span class="sug-dot"></span>
             <span class="sug-lbl">Sugestão agora</span>
           </div>
           <p class="sug-tx" id="sugTx">Aguardando interações...</p>
@@ -95,11 +95,13 @@
         </div>
       </div>
 
-      <!-- FEED DE EVENTOS -->
+      <!-- HEADER FIXO DO FEED -->
       <div class="sec-header">
         <span class="sec-t">📋 Eventos de hoje</span>
         <span class="count-pill" id="feedCount">0</span>
       </div>
+
+      <!-- SÓ O FEED ROLA -->
       <div class="feed" id="feed"></div>
 
       <!-- Barra de navegação -->

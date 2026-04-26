@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════
-   devtools.js — Fala Comigo
+   devtools.js — ConecTEA
    Modal de DevTools auto-injetável.
    Basta incluir este script em qualquer página
    (após state.js) e o botão 🛠️ aparece.

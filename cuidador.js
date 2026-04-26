@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════
-   cuidador.js — Fala Comigo
+   cuidador.js — ConecTEA
    Lê todos os dados do state.js (localStorage).
    Atualiza automaticamente quando a criança
    interage (mesmo em outra aba).
@@ -81,13 +81,15 @@ function renderFeed() {
     card.style.animationDelay = `${Math.min(i, 8) * 0.06}s`;
     card.dataset.id = e.id;
 
+    const profile = FalaComigo.getProfile();
     card.innerHTML = `
       <div class="ec-bull"></div>
-      <span class="ec-ico">${e.icon}</span>
+      <div class="ec-ico">${e.icon}</div>
       <div class="ec-c">
         <p class="ec-msg">${e.message}</p>
         <div class="ec-meta">
           <span class="ec-time">${e.time}</span>
+          <span class="ec-child">${profile.name || 'Criança'}</span>
           <span class="badge ${badge}">${bt}</span>
           ${e.note ? `<span class="badge b-ped">📝 Nota</span>` : ''}
         </div>
@@ -316,14 +318,19 @@ function updateStats() {
   }
 }
 
+/* ── RENDERIZAR RELATÓRIO COMPLETO ── */
+function renderRelatorio() {
+  renderHumorChart();
+  renderNeedsChart();
+  updateStats();
+}
+
 /* ── LISTENERS DE EVENTOS ── */
 function setupEventListeners() {
 
   // Topbar
   document.getElementById('btnRel').addEventListener('click', () => {
-    renderHumorChart();
-    renderNeedsChart();
-    updateStats();
+    renderRelatorio();
     goTo('rel');
   });
   document.getElementById('btnCo').addEventListener('click', () => goTo('checkout'));
@@ -402,6 +409,9 @@ function setupEventListeners() {
   FalaComigo.on('fc_new_event', (event) => {
     renderFeed();
 
+    // Se o relatório estiver aberto, atualiza também
+    if (currentScreen === 'rel') renderRelatorio();
+
     // Notificação visual de novo evento
     const tipo = event.type === 'sos'   ? '🚨 SOS recebido!'
                : event.type === 'humor' ? '💬 Humor atualizado'
@@ -411,6 +421,9 @@ function setupEventListeners() {
 
   FalaComigo.on('fc_event_updated', () => {
     renderFeed();
+
+    // Se o relatório estiver aberto, atualiza também
+    if (currentScreen === 'rel') renderRelatorio();
   });
 }
 
